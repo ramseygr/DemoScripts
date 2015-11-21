@@ -1,6 +1,5 @@
 #http://gregramsey.net/2014/05/14/automating-the-disk-cleanup-utility/
-#more info here:
-#http://support.microsoft.com/kb/253597
+#more info here:#http://support.microsoft.com/kb/253597
 
 #ensure we're running on windows 8.1 first
 if ((Get-CimInstance win32_operatingsystem).version -eq '6.3.9600') {
