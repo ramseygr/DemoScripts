@@ -1,4 +1,4 @@
-﻿#Publish-CMData - 
+﻿#Publish-CMData - https://gregramsey.net/2016/12/31/how-to-publish-configmgr-data-to-oms/
 
 # Replace with your Workspace ID
 $CustomerId = "e4ff0038-49647-4c0c-49647-99a3c49647d5"  
