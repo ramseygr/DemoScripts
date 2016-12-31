@@ -1,10 +1,10 @@
 ﻿#Publish-CMData - 
 
 # Replace with your Workspace ID
-$CustomerId = "e4ff0038-57fd-4c0c-9268-99a3c49647d5"  
+$CustomerId = "e4926838-57fd-4c0c-9268-99a3c4992685"  
 
 # Replace with your Primary Key
-$SharedKey = "CPfHRvey56FIaVokla3WVzic3fzYi6CkMgCNPWT/tPG/mG1FxMt8RcsHGuEY8Tq63WvUGLe00pcf+4t7b1aAMg=="
+$SharedKey = "CPfHCNPWT56FIaVokla3WVzic3fzYHGuEMgCNPWT/tPG/mG1FxMt8RcsHGuEY8Tq63WvUGCNPWTf+4t7b1aAMg=="
 
 # Specify the name of the record type that you'll be creating
 $LogType = "CM_CollevalInfo"
