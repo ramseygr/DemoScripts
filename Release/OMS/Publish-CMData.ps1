@@ -12,7 +12,7 @@ $LogType = "CM_CollevalInfo"
 # Specify a field with the created time for the records
 $TimeStampField = "LastEvaluationCompletionTime"
 
-$cnstring = 'Provider=SQLOLEDB.1;Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=CM_AM1;Data Source=auspwcfgam1db;User ID=;Password='
+$cnstring = 'Provider=SQLOLEDB.1;Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=CM_PS1;Data Source=mySiteServerDB;User ID=;Password='
 
 
 $cmdtext = @"
