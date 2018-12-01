@@ -1,10 +1,4 @@
-﻿
-#region Import CM Module
-$CMModulePath = `
-    $Env:SMS_ADMIN_UI_PATH.ToString().SubString(0,$Env:SMS_ADMIN_UI_PATH.Length - 5) `
-    + "\ConfigurationManager.psd1" 
-Import-Module $CMModulePath -force
-cd TP1:
-#endregion
+﻿#Demo 1
+psedit "C:\Users\ramseygr\Documents\GitHub\DemoScripts\Conferences\MMSDE2018\1.ps1"
 
-
+#Demo 2
