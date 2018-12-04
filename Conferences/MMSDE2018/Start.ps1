@@ -1,8 +1,10 @@
-﻿#Demo 1
+﻿
 psedit "C:\Users\ramseygr\Documents\GitHub\DemoScripts\Conferences\MMSDE2018\1-overview.ps1"
+
 psedit "C:\Users\ramseygr\Documents\GitHub\DemoScripts\Conferences\MMSDE2018\2-statusmsg.ps1"
 
-#Demo 2
+psedit "C:\Users\ramseygr\Documents\GitHub\DemoScripts\Conferences\MMSDE2018\3-Scripts.ps1"
+
 
 
 

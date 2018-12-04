@@ -1,3 +1,5 @@
+Exit 
+
 #region Import CM Module
 $CMModulePath = `
     $Env:SMS_ADMIN_UI_PATH.ToString().SubString(0,$Env:SMS_ADMIN_UI_PATH.Length - 5) `
@@ -32,7 +34,7 @@ Get-CMDevice -CollectionName "Test Coll" | select Name, ADLastLogonTime, ADSiteN
 #region query example
 
 #display all queries
-get-cmquery | out-gridview
+Get-CMQuery | out-gridview
 
 #run a query
 Invoke-CMQuery -Name 'All Systems'
@@ -67,6 +69,9 @@ Measure-Command { Invoke-CMWmiQuery -Query $wql} |
 #direct wmi query
 Measure-Command {Get-CimInstance -Namespace root\sms\site_tp1 `
     -ClassName sms_cm_res_coll_TP100015} | select Totalseconds
+
+
+
 
 
 #example with lazy property
