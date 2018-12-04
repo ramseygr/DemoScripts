@@ -15,7 +15,7 @@ Get-CMScript | Where-Object {$_.approvalstate -eq 0} | Approve-CMScript
 Get-CMScript -ScriptName "BITS2" | 
     Invoke-CMScript -CollectionName "My Limited Collection for Running Scripts"
 
-get-cmscript -ScriptName "Check BITS"
+
 
 
 
@@ -56,3 +56,7 @@ $LastRunDetails | foreach {
 
 $collobj | Out-GridView
 
+
+
+#remove script
+Remove-CMScript -ScriptName "BITS2" -Force
