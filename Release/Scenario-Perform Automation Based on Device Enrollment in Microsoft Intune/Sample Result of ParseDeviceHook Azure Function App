@@ -1,0 +1,33 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Vary": "Accept-Encoding",
+        "Request-Context": "appId=",
+        "Set-Cookie": "ARRAffinity=ce0e85ac419a12327d8a146aef282b5xxxxxxxxxxxxxxxxxxxxxxxx;Path=/;HttpOnly;Domain=parsedeviceenrollhook.azurewebsites.net,ARRAffinity=9ee692888385645b94fec250137feac2954ed25f37e2904f8124cec7269747e7;Path=/;HttpOnly;Domain=parsedeviceenrollhook.azurewebsites.net",
+        "Date": "Sat, 11 Apr 2020 06:25:06 GMT",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "3005"
+    },
+    "body": [
+        {
+            "Type": "IntuneOperationalLogs",
+            "OperationName": "ESPEnrollment",
+            "TimeGenerated": "2020-04-11T05:23:40.264Z",
+            "SourceSystem": "Microsoft Intune",
+            "Result": "None",
+            "TenantId": "1eebdc41-be19-43a4-826a-c9e12740db99",
+            "Category": "OperationalLogs",
+            "Properties": "{\r\n  \"EnrollmentStartTime\": \"2020-04-11T05:23:38.3791076Z\",\r\n  \"EnrollmentEndTime\": \"2020-04-11T05:23:40.2646604Z\",\r\n  \"TimeDiff\": \"2\",\r\n  \"Status\": \"Success\",\r\n  \"UserId\": \"f594b6b9-5419-45d8-9ecb-ea837a17aa07\",\r\n  \"DeviceId\": \"7e4be3df-4cfa-46ab-97ea-306437eead0c\",\r\n  \"EventId\": \"46801\",\r\n  \"Scope\": \"EnrollmentSuccess\",\r\n  \"UserUPN\": \"greg@ramseyg.com\",\r\n  \"EnrollmentType\": \"10\",\r\n  \"EnrollmentTypeMessage\": \"AutoEnrollment\",\r\n  \"IsAutopilot\": \"False\",\r\n  \"AadDeviceId\": \"a7f65347-18ce-4575-9f28-6e75ba9e059f\",\r\n  \"IsDuringEsp\": 0,\r\n  \"Version\": \"10.0.18363.0\",\r\n  \"AadTenantId\": \"8f0a670f-cf43-4ab7-a2eb-8b57d6f59bc1\",\r\n  \"ScenarioName\": \"Microsoft.Management.Services.Diagnostics.SLAEvents.EnrollmentStatusPageSLAEvent\",\r\n  \"ActivityId\": \"7e4be3df-4cfa-46ab-97ea-306437eead0c\",\r\n  \"RelatedActivityId\": \"7f32e1da-5f1b-47ca-8334-bd2254bd43ef\",\r\n  \"Result\": \"0\",\r\n  \"Timestamp\": \"2020-04-11T05:23:40.2646604Z\",\r\n  \"StartTime\": \"0001-01-01T00:00:00\",\r\n  \"AccountId\": \"2713e776-be5c-4951-b487-7be410a01c85\",\r\n  \"ScaleUnit\": \"AMSUA0402\"\r\n}"
+        },
+        {
+            "Type": "IntuneOperationalLogs",
+            "OperationName": "ESPEnrollment",
+            "TimeGenerated": "2020-04-11T05:24:00.629Z",
+            "SourceSystem": "Microsoft Intune",
+            "Result": "None",
+            "TenantId": "1eebdc41-be19-43a4-826a-c9e12740db99",
+            "Category": "OperationalLogs",
+            "Properties": "{\r\n  \"EnrollmentStartTime\": \"2020-04-11T05:23:58.4764823Z\",\r\n  \"EnrollmentEndTime\": \"2020-04-11T05:24:00.6299419Z\",\r\n  \"TimeDiff\": \"2\",\r\n  \"Status\": \"Success\",\r\n  \"UserId\": \"f594b6b9-5419-45d8-9ecb-ea837a17aa07\",\r\n  \"DeviceId\": \"7af4180d-d1e0-4347-9cb1-f4d12a9bf04a\",\r\n  \"EventId\": \"46801\",\r\n  \"Scope\": \"EnrollmentSuccess\",\r\n  \"UserUPN\": \"greg@ramseyg.com\",\r\n  \"EnrollmentType\": \"10\",\r\n  \"EnrollmentTypeMessage\": \"AutoEnrollment\",\r\n  \"IsAutopilot\": \"False\",\r\n  \"AadDeviceId\": \"3fdc7bba-f314-4f64-a411-19a5f94b653c\",\r\n  \"IsDuringEsp\": 0,\r\n  \"Version\": \"10.0.18362.0\",\r\n  \"AadTenantId\": \"8f0a670f-cf43-4ab7-a2eb-8b57d6f59bc1\",\r\n  \"ScenarioName\": \"Microsoft.Management.Services.Diagnostics.SLAEvents.EnrollmentStatusPageSLAEvent\",\r\n  \"ActivityId\": \"7af4180d-d1e0-4347-9cb1-f4d12a9bf04a\",\r\n  \"RelatedActivityId\": \"805f103e-da01-4345-b250-cb6ccd26fa2e\",\r\n  \"Result\": \"0\",\r\n  \"Timestamp\": \"2020-04-11T05:24:00.6299419Z\",\r\n  \"StartTime\": \"0001-01-01T00:00:00\",\r\n  \"AccountId\": \"2713e776-be5c-4951-b487-7be410a01c85\",\r\n  \"ScaleUnit\": \"AMSUA0402\"\r\n}"
+        }
+    ]
+}
