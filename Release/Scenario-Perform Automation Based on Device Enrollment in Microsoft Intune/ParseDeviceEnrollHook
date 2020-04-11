@@ -1,0 +1,58 @@
+using namespace System.Net
+
+# Input bindings are passed in via param block.
+param($Request, $TriggerMetadata)
+
+# Write to the Azure Functions log stream.
+Write-Host "PowerShell HTTP trigger function processed a request."
+
+# Interact with query parameters or the body of the request.
+
+#Take the  information from Azure Common Alert Schema for Log Analytics, 
+# and get the query results into a format we can actually use
+$columns = $Request.body.data.alertContext.SearchResults.tables.columns.name
+$rows = $Request.body.data.alertContext.SearchResults.tables.rows
+
+#Set name-value pairs for each Search Result
+$arr = @()
+
+if ($Request.body.data.alertContext.ResultCount -eq 1) {
+    $hash = @{}
+
+    for ($i = 0; $i -lt $columns.count; $i++)
+    { 
+        $hash.Add($columns[$i],$rows[$i])
+    }
+    $arr += $hash
+}
+
+
+else {
+$rows | foreach {
+$hash = @{}
+
+for ($i = 0; $i -lt $columns.count; $i++)
+    { 
+        $hash.Add($columns[$i],$_[$i])
+    }
+        $arr += $hash
+    }
+}
+
+#Ensure we have an array of the results, and convert to JSON
+$arrResults = ConvertTo-Json @($arr) -Compress
+
+if ($arrResults) {
+    $status = [HttpStatusCode]::OK
+    $body = $arrResults
+}
+else {
+    $status = [HttpStatusCode]::BadRequest
+    $body = "No Data."
+}
+
+# Associate values to output bindings by calling 'Push-OutputBinding'.
+Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+    StatusCode = $status
+    Body = $body
+})
