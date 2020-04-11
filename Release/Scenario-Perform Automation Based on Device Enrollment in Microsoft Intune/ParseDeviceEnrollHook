@@ -1,3 +1,8 @@
+#ParseDeviceEnrollHook is the for a Azure Function App that converts an Azure Monitor Common Alert Schema for Log Analytics,
+# and converts the query results into a format that we can actually use in LogicApps.
+# Sample input: https://github.com/ramseygr/DemoScripts/blob/master/Release/Scenario-Perform%20Automation%20Based%20on%20Device%20Enrollment%20in%20Microsoft%20Intune/Sample%20Azure%20Monitor%20Common%20Alert%20Schema%20-%20Log%20Analytics
+# Sample output: https://github.com/ramseygr/DemoScripts/blob/master/Release/Scenario-Perform%20Automation%20Based%20on%20Device%20Enrollment%20in%20Microsoft%20Intune/Sample%20Result%20of%20ParseDeviceHook%20Azure%20Function%20App
+
 using namespace System.Net
 
 # Input bindings are passed in via param block.
