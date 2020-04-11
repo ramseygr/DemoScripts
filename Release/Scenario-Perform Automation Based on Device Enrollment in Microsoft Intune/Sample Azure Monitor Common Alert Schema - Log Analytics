@@ -1,0 +1,111 @@
+{
+  "schemaId": "azureMonitorCommonAlertSchema",
+  "data": {
+    "essentials": {
+      "alertId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/providers/Microsoft.AlertsManagement/alerts/64373704-298e-4ebe-b876-179be005573e",
+      "alertRule": "New Device Enrolled",
+      "severity": "Sev4",
+      "signalType": "Log",
+      "monitorCondition": "Fired",
+      "monitoringService": "Log Analytics",
+      "alertTargetIDs": [
+        "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/intunetest/providers/microsoft.operationalinsights/workspaces/intunetestgr"
+      ],
+      "originAlertId": "214e68ab-8356-4ac0-a04f-fd68478a74ac",
+      "firedDateTime": "2020-04-11T05:32:47.2432367Z",
+      "description": "Creates an alert whenever a new device is enrolled in Intune.",
+      "essentialsVersion": "1.0",
+      "alertContextVersion": "1.1"
+    },
+    "alertContext": {
+      "SearchQuery": "IntuneOperationalLogs | where OperationName == 'ESPEnrollment' and Category == 'OperationalLogs'\n",
+      "SearchIntervalStartTimeUtc": "2020-04-11T05:20:21Z",
+      "SearchIntervalEndtimeUtc": "2020-04-11T05:25:21Z",
+      "ResultCount": 2,
+      "LinkToSearchResults": "https://portal.azure.com#@8f0a670f-cf43-4ab7-a2eb-8b57d6f59bc1/blade/Microsoft_OperationsManagementSuite_Workspace/AnalyticsBlade/initiator/AnalyticsShareLinkToQuery/isQueryEditorVisible/true/scope/%7B%22resources%22%3A%5B%7B%22resourceId%22%3A%22%2Fsubscriptions%2Fxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx%2Fresourcegroups%2Fintunetest%2Fproviders%2Fmicrosoft.operationalinsights%2Fworkspaces%2Fintunetestgr%22%7D%5D%7D/query/IntuneOperationalLogs%20%7C%20where%20OperationName%20%3D%3D%20%27ESPEnrollment%27%20and%20Category%20%3D%3D%20%27OperationalLogs%27%0A/isQuerybase64Compressed/false/timespanInIsoFormat/2020-04-11T05%3a20%3a21.0000000Z%2f2020-04-11T05%3a25%3a21.0000000Z",
+      "LinkToSearchResultsApi": "https://api.loganalytics.io/v1/workspaces/1eebdc41-be19-43a4-826a-c9e12740db99/query?query=IntuneOperationalLogs%20%7C%20where%20OperationName%20%3D%3D%20%27ESPEnrollment%27%20and%20Category%20%3D%3D%20%27OperationalLogs%27%0A&timespan=2020-04-11T05%3a20%3a21.0000000Z%2f2020-04-11T05%3a25%3a21.0000000Z",
+      "SeverityDescription": "Warning",
+      "WorkspaceId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "SearchIntervalDurationMin": "5",
+      "AffectedConfigurationItems": [],
+      "AlertType": "Number of results",
+      "IncludeSearchResults": true,
+      "SearchIntervalInMinutes": "5",
+      "SearchResults": {
+        "tables": [
+          {
+            "name": "PrimaryResult",
+            "columns": [
+              {
+                "name": "TenantId",
+                "type": "string"
+              },
+              {
+                "name": "SourceSystem",
+                "type": "string"
+              },
+              {
+                "name": "TimeGenerated",
+                "type": "datetime"
+              },
+              {
+                "name": "OperationName",
+                "type": "string"
+              },
+              {
+                "name": "Category",
+                "type": "string"
+              },
+              {
+                "name": "Properties",
+                "type": "string"
+              },
+              {
+                "name": "Result",
+                "type": "string"
+              },
+              {
+                "name": "Type",
+                "type": "string"
+              }
+            ],
+            "rows": [
+              [
+                "1eebdc41-be19-43a4-826a-c9e12740db99",
+                "Microsoft Intune",
+                "2020-04-11T05:23:40.264Z",
+                "ESPEnrollment",
+                "OperationalLogs",
+                "{\r\n  \"EnrollmentStartTime\": \"2020-04-11T05:23:38.3791076Z\",\r\n  \"EnrollmentEndTime\": \"2020-04-11T05:23:40.2646604Z\",\r\n  \"TimeDiff\": \"2\",\r\n  \"Status\": \"Success\",\r\n  \"UserId\": \"f594b6b9-5419-45d8-9ecb-ea837a17aa07\",\r\n  \"DeviceId\": \"7e4be3df-4cfa-46ab-97ea-306437eead0c\",\r\n  \"EventId\": \"46801\",\r\n  \"Scope\": \"EnrollmentSuccess\",\r\n  \"UserUPN\": \"greg@ramseyg.com\",\r\n  \"EnrollmentType\": \"10\",\r\n  \"EnrollmentTypeMessage\": \"AutoEnrollment\",\r\n  \"IsAutopilot\": \"False\",\r\n  \"AadDeviceId\": \"a7f65347-18ce-4575-9f28-6e75ba9e059f\",\r\n  \"IsDuringEsp\": 0,\r\n  \"Version\": \"10.0.18363.0\",\r\n  \"AadTenantId\": \"8f0a670f-cf43-4ab7-a2eb-8b57d6f59bc1\",\r\n  \"ScenarioName\": \"Microsoft.Management.Services.Diagnostics.SLAEvents.EnrollmentStatusPageSLAEvent\",\r\n  \"ActivityId\": \"7e4be3df-4cfa-46ab-97ea-306437eead0c\",\r\n  \"RelatedActivityId\": \"7f32e1da-5f1b-47ca-8334-bd2254bd43ef\",\r\n  \"Result\": \"0\",\r\n  \"Timestamp\": \"2020-04-11T05:23:40.2646604Z\",\r\n  \"StartTime\": \"0001-01-01T00:00:00\",\r\n  \"AccountId\": \"2713e776-be5c-4951-b487-7be410a01c85\",\r\n  \"ScaleUnit\": \"AMSUA0402\"\r\n}",
+                "None",
+                "IntuneOperationalLogs"
+              ],
+              [
+                "1eebdc41-be19-43a4-826a-c9e12740db99",
+                "Microsoft Intune",
+                "2020-04-11T05:24:00.629Z",
+                "ESPEnrollment",
+                "OperationalLogs",
+                "{\r\n  \"EnrollmentStartTime\": \"2020-04-11T05:23:58.4764823Z\",\r\n  \"EnrollmentEndTime\": \"2020-04-11T05:24:00.6299419Z\",\r\n  \"TimeDiff\": \"2\",\r\n  \"Status\": \"Success\",\r\n  \"UserId\": \"f594b6b9-5419-45d8-9ecb-ea837a17aa07\",\r\n  \"DeviceId\": \"7af4180d-d1e0-4347-9cb1-f4d12a9bf04a\",\r\n  \"EventId\": \"46801\",\r\n  \"Scope\": \"EnrollmentSuccess\",\r\n  \"UserUPN\": \"greg@ramseyg.com\",\r\n  \"EnrollmentType\": \"10\",\r\n  \"EnrollmentTypeMessage\": \"AutoEnrollment\",\r\n  \"IsAutopilot\": \"False\",\r\n  \"AadDeviceId\": \"3fdc7bba-f314-4f64-a411-19a5f94b653c\",\r\n  \"IsDuringEsp\": 0,\r\n  \"Version\": \"10.0.18362.0\",\r\n  \"AadTenantId\": \"8f0a670f-cf43-4ab7-a2eb-8b57d6f59bc1\",\r\n  \"ScenarioName\": \"Microsoft.Management.Services.Diagnostics.SLAEvents.EnrollmentStatusPageSLAEvent\",\r\n  \"ActivityId\": \"7af4180d-d1e0-4347-9cb1-f4d12a9bf04a\",\r\n  \"RelatedActivityId\": \"805f103e-da01-4345-b250-cb6ccd26fa2e\",\r\n  \"Result\": \"0\",\r\n  \"Timestamp\": \"2020-04-11T05:24:00.6299419Z\",\r\n  \"StartTime\": \"0001-01-01T00:00:00\",\r\n  \"AccountId\": \"2713e776-be5c-4951-b487-7be410a01c85\",\r\n  \"ScaleUnit\": \"AMSUA0402\"\r\n}",
+                "None",
+                "IntuneOperationalLogs"
+              ]
+            ]
+          }
+        ],
+        "dataSources": [
+          {
+            "resourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/intunetest/providers/microsoft.operationalinsights/workspaces/intunetestgr",
+            "region": "westus2",
+            "tables": [
+              "IntuneOperationalLogs"
+            ]
+          }
+        ]
+      },
+      "Threshold": 0,
+      "Operator": "Greater Than",
+      "IncludedSearchResults": "True"
+    }
+  }
+}
