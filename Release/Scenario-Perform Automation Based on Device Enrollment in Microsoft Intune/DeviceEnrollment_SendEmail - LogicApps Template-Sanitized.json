@@ -1,0 +1,601 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "office365_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "office365-1"
+    },
+    "office365_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "someone@someone.com"
+    },
+    "LogicAppLocation": {
+      "type": "string",
+      "minLength": 1,
+      "allowedValues": [
+        "[resourceGroup().location]",
+        "eastasia",
+        "southeastasia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "westus",
+        "northcentralus",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "japanwest",
+        "japaneast",
+        "brazilsouth",
+        "australiaeast",
+        "australiasoutheast",
+        "southindia",
+        "centralindia",
+        "westindia",
+        "canadacentral",
+        "canadaeast",
+        "uksouth",
+        "ukwest",
+        "westcentralus",
+        "westus2",
+        "koreacentral",
+        "koreasouth",
+        "francecentral",
+        "francesouth",
+        "uaecentral",
+        "southafricanorth",
+        "southafricawest"
+      ],
+      "defaultValue": "southcentralus"
+    },
+    "LogicAppName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "DeviceEnrollment-Complete"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "For_each": {
+              "type": "Foreach",
+              "foreach": "@body('Parse_JSON')",
+              "actions": {
+                "Graph_Query_to_GetMangedDevice": {
+                  "type": "Http",
+                  "inputs": {
+                    "method": "GET",
+                    "uri": "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/@{body('Parse_Properties')?['DeviceId']}",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "authentication": {
+                      "audience": "https://graph.microsoft.com",
+                      "clientId": "##GRAPHAUTH_CLIENT_ID##",
+                      "secret": "##GRAPHAUTH_SECRET##",
+                      "tenant": "##GRAPHTENANT_ID##",
+                      "type": "ActiveDirectoryOAuth"
+                    }
+                  },
+                  "runAfter": {
+                    "Parse_Properties": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Parse_GetManagedDevice_Results": {
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Graph_Query_to_GetMangedDevice')",
+                    "schema": {
+                      "properties": {
+                        "@@odata.context": {
+                          "type": "string"
+                        },
+                        "activationLockBypassCode": {},
+                        "androidSecurityPatchLevel": {},
+                        "azureADDeviceId": {
+                          "type": "string"
+                        },
+                        "azureADRegistered": {
+                          "type": "boolean"
+                        },
+                        "complianceGracePeriodExpirationDateTime": {
+                          "type": "string"
+                        },
+                        "complianceState": {
+                          "type": "string"
+                        },
+                        "configurationManagerClientEnabledFeatures": {},
+                        "deviceActionResults": {
+                          "type": "array"
+                        },
+                        "deviceCategoryDisplayName": {
+                          "type": "string"
+                        },
+                        "deviceEnrollmentType": {
+                          "type": "string"
+                        },
+                        "deviceHealthAttestationState": {},
+                        "deviceName": {
+                          "type": "string"
+                        },
+                        "deviceRegistrationState": {
+                          "type": "string"
+                        },
+                        "easActivated": {
+                          "type": "boolean"
+                        },
+                        "easActivationDateTime": {
+                          "type": "string"
+                        },
+                        "easDeviceId": {
+                          "type": "string"
+                        },
+                        "emailAddress": {
+                          "type": "string"
+                        },
+                        "enrolledDateTime": {
+                          "type": "string"
+                        },
+                        "exchangeAccessState": {
+                          "type": "string"
+                        },
+                        "exchangeAccessStateReason": {
+                          "type": "string"
+                        },
+                        "exchangeLastSuccessfulSyncDateTime": {
+                          "type": "string"
+                        },
+                        "freeStorageSpaceInBytes": {
+                          "type": "integer"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "imei": {},
+                        "isEncrypted": {
+                          "type": "boolean"
+                        },
+                        "isSupervised": {
+                          "type": "boolean"
+                        },
+                        "jailBroken": {
+                          "type": "string"
+                        },
+                        "lastSyncDateTime": {
+                          "type": "string"
+                        },
+                        "managedDeviceName": {
+                          "type": "string"
+                        },
+                        "managedDeviceOwnerType": {
+                          "type": "string"
+                        },
+                        "managementAgent": {
+                          "type": "string"
+                        },
+                        "manufacturer": {
+                          "type": "string"
+                        },
+                        "meid": {},
+                        "model": {
+                          "type": "string"
+                        },
+                        "operatingSystem": {
+                          "type": "string"
+                        },
+                        "osVersion": {
+                          "type": "string"
+                        },
+                        "partnerReportedThreatState": {
+                          "type": "string"
+                        },
+                        "phoneNumber": {},
+                        "remoteAssistanceSessionErrorDetails": {
+                          "type": "string"
+                        },
+                        "remoteAssistanceSessionUrl": {
+                          "type": "string"
+                        },
+                        "serialNumber": {
+                          "type": "string"
+                        },
+                        "subscriberCarrier": {
+                          "type": "string"
+                        },
+                        "totalStorageSpaceInBytes": {
+                          "type": "integer"
+                        },
+                        "userDisplayName": {
+                          "type": "string"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "userPrincipalName": {
+                          "type": "string"
+                        },
+                        "wiFiMacAddress": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Graph_Query_to_GetMangedDevice": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Parse_Properties": {
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@items('For_each')['Properties']",
+                    "schema": {
+                      "properties": {
+                        "AadDeviceId": {
+                          "type": "string"
+                        },
+                        "AadTenantId": {
+                          "type": "string"
+                        },
+                        "AccountId": {
+                          "type": "string"
+                        },
+                        "ActivityId": {
+                          "type": "string"
+                        },
+                        "DeviceId": {
+                          "type": "string"
+                        },
+                        "EnrollmentEndTime": {
+                          "type": "string"
+                        },
+                        "EnrollmentStartTime": {
+                          "type": "string"
+                        },
+                        "EnrollmentType": {
+                          "type": "string"
+                        },
+                        "EnrollmentTypeMessage": {
+                          "type": "string"
+                        },
+                        "EventId": {
+                          "type": "string"
+                        },
+                        "IsAutopilot": {
+                          "type": "string"
+                        },
+                        "IsDuringEsp": {
+                          "type": "integer"
+                        },
+                        "RelatedActivityId": {
+                          "type": "string"
+                        },
+                        "Result": {
+                          "type": "string"
+                        },
+                        "ScaleUnit": {
+                          "type": "string"
+                        },
+                        "ScenarioName": {
+                          "type": "string"
+                        },
+                        "Scope": {
+                          "type": "string"
+                        },
+                        "StartTime": {
+                          "type": "string"
+                        },
+                        "Status": {
+                          "type": "string"
+                        },
+                        "TimeDiff": {
+                          "type": "string"
+                        },
+                        "Timestamp": {
+                          "type": "string"
+                        },
+                        "UserId": {
+                          "type": "string"
+                        },
+                        "UserUPN": {
+                          "type": "string"
+                        },
+                        "Version": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Send_an_email_(V2)": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['office365']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "body": {
+                      "To": "someone@someone.com",
+                      "Subject": "Test email for device enrollment",
+                      "Body": "<p>deviceName=@{body('Parse_GetManagedDevice_Results')?['deviceName']}<br>\nmanagedDeviceOwnerType=@{body('Parse_GetManagedDevice_Results')?['managedDeviceOwnerType']}<br>\nenrolledDateTime=@{body('Parse_GetManagedDevice_Results')?['enrolledDateTime']}<br>\noperatingSystem=@{body('Parse_GetManagedDevice_Results')?['operatingSystem']}<br>\ncomplianceState=@{body('Parse_GetManagedDevice_Results')?['complianceState']}<br>\nmanagedmentAgent=@{body('Parse_GetManagedDevice_Results')?['managementAgent']}<br>\nosVersion=@{body('Parse_GetManagedDevice_Results')?['osVersion']}<br>\nemailAddress=@{body('Parse_GetManagedDevice_Results')?['emailAddress']}<br>\nazureADDeviceID=@{body('Parse_GetManagedDevice_Results')?['azureADDeviceId']}<br>\nmodel=@{body('Parse_GetManagedDevice_Results')?['model']}<br>\nmanufacturer=@{body('Parse_GetManagedDevice_Results')?['manufacturer']}<br>\nserialNumber=@{body('Parse_GetManagedDevice_Results')?['serialNumber']}<br>\nuserDisplayName=@{body('Parse_GetManagedDevice_Results')?['userDisplayName']}<br>\nuserPrincipalName=@{body('Parse_GetManagedDevice_Results')?['userPrincipalName']}<br>\n<br>\n<br>\nAadDeviceID=@{body('Parse_Properties')?['AadDeviceId']}<br>\nAadTenantID=@{body('Parse_Properties')?['AadTenantId']}<br>\nAccountID=@{body('Parse_Properties')?['AccountId']}<br>\nActivityID=@{body('Parse_Properties')?['ActivityId']}<br>\nDeviceID=@{body('Parse_Properties')?['DeviceId']}<br>\nEnrollmentEndTime=@{body('Parse_Properties')?['EnrollmentEndTime']}<br>\nEnrollmentStartTime=@{body('Parse_Properties')?['EnrollmentStartTime']}<br>\nEnrollmentType=@{body('Parse_Properties')?['EnrollmentType']}<br>\nEnrollmentTypeMessage=@{body('Parse_Properties')?['EnrollmentTypeMessage']}<br>\nEventID=@{body('Parse_Properties')?['EventId']}<br>\nIsAutoPilot=@{body('Parse_Properties')?['IsAutopilot']}<br>\nIsDuringESP=@{body('Parse_Properties')?['IsDuringEsp']}<br>\nRelatedActivityID=@{body('Parse_Properties')?['RelatedActivityId']}<br>\nResult=@{body('Parse_Properties')?['Result']}<br>\nScaleUnit=@{body('Parse_Properties')?['ScaleUnit']}<br>\nScnearioName=@{body('Parse_Properties')?['ScenarioName']}<br>\nScope=@{body('Parse_Properties')?['Scope']}<br>\nStartTime=@{body('Parse_Properties')?['StartTime']}<br>\nStatus=@{body('Parse_Properties')?['Status']}<br>\nTimeDiff=@{body('Parse_Properties')?['TimeDiff']}<br>\nTimeStamp=@{body('Parse_Properties')?['Timestamp']}<br>\nUserID=@{body('Parse_Properties')?['UserId']}<br>\nUserUPN=@{body('Parse_Properties')?['UserUPN']}<br>\nVersion=@{body('Parse_Properties')?['Version']}</p>"
+                    },
+                    "path": "/v2/Mail"
+                  },
+                  "runAfter": {
+                    "Parse_GetManagedDevice_Results": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Parse_JSON": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "HttpTrigger": {
+              "type": "Function",
+              "inputs": {
+                "body": "@triggerBody()",
+                "headers": {
+                  "ContentType": "Application/Json"
+                },
+                "function": {
+                  "id": "/subscriptions/##AZUREFUNCTION_SUBSCRIPTIONID##/resourceGroups/IntuneTest/providers/Microsoft.Web/sites/ParseDeviceEnrollHook/functions/##AZUREFUNCTION_FUNCTIONNAME##"
+                }
+              },
+              "runAfter": {}
+            },
+            "Parse_JSON": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('HttpTrigger')",
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "Category": {
+                        "type": "string"
+                      },
+                      "OperationName": {
+                        "type": "string"
+                      },
+                      "Properties": {
+                        "type": "string"
+                      },
+                      "Result": {
+                        "type": "string"
+                      },
+                      "SourceSystem": {
+                        "type": "string"
+                      },
+                      "TenantId": {
+                        "type": "string"
+                      },
+                      "TimeGenerated": {
+                        "type": "string"
+                      },
+                      "Type": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "TimeGenerated",
+                      "OperationName",
+                      "Type",
+                      "TenantId",
+                      "Properties",
+                      "SourceSystem",
+                      "Result",
+                      "Category"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "runAfter": {
+                "HttpTrigger": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "body": {
+                      "properties": {
+                        "data": {
+                          "properties": {
+                            "IncludeSearchResults": {
+                              "type": "boolean"
+                            },
+                            "SearchResults": {
+                              "properties": {
+                                "dataSources": {
+                                  "items": {
+                                    "properties": {
+                                      "region": {
+                                        "type": "string"
+                                      },
+                                      "resourceId": {
+                                        "type": "string"
+                                      },
+                                      "tables": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "resourceId",
+                                      "region",
+                                      "tables"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "tables": {
+                                  "items": {
+                                    "properties": {
+                                      "columns": {
+                                        "items": {
+                                          "properties": {
+                                            "name": {
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "type"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "rows": {
+                                        "items": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "columns",
+                                      "rows"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "alertname": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string"
+                            },
+                            "subscriptionid": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "schemaId": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "headers": {
+                      "properties": {
+                        "Connection": {
+                          "type": "string"
+                        },
+                        "Content-Length": {
+                          "type": "string"
+                        },
+                        "Content-Type": {
+                          "type": "string"
+                        },
+                        "Expect": {
+                          "type": "string"
+                        },
+                        "Host": {
+                          "type": "string"
+                        },
+                        "User-Agent": {
+                          "type": "string"
+                        },
+                        "X-CorrelationContext": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "office365": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'southcentralus', '/managedApis/', 'office365')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('office365_1_Connection_Name'))]",
+                "connectionName": "[parameters('office365_1_Connection_Name')]"
+              }
+            }
+          }
+        }
+      },
+      "name": "[parameters('LogicAppName')]",
+      "type": "Microsoft.Logic/workflows",
+      "location": "[parameters('LogicAppLocation')]",
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "apiVersion": "2016-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('office365_1_Connection_Name'))]"
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('office365_1_Connection_Name')]",
+      "location": "southcentralus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'southcentralus', '/managedApis/', 'office365')]"
+        },
+        "displayName": "[parameters('office365_1_Connection_DisplayName')]"
+      }
+    }
+  ],
+  "outputs": {}
+}
