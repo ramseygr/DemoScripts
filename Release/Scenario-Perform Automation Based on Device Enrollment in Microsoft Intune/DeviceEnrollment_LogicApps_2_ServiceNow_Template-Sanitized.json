@@ -1,0 +1,918 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "office365_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "office365-1"
+    },
+    "office365_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "someone@someone.com"
+    },
+    "service-now_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "service-now"
+    },
+    "service-now_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "dev80150"
+    },
+    "service-now_1_instance": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the instance for ServiceNow"
+      },
+      "defaultValue": "##SERVICENOW_FQDN##"
+    },
+    "service-now_1_username": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for ServiceNow"
+      },
+      "defaultValue": "##SERVICNOW_USERNAME##"
+    },
+    "service-now_1_password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for this account"
+      }
+    },
+    "LogicAppLocation": {
+      "type": "string",
+      "minLength": 1,
+      "allowedValues": [
+        "[resourceGroup().location]",
+        "eastasia",
+        "southeastasia",
+        "centralus",
+        "eastus",
+        "eastus2",
+        "westus",
+        "northcentralus",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "japanwest",
+        "japaneast",
+        "brazilsouth",
+        "australiaeast",
+        "australiasoutheast",
+        "southindia",
+        "centralindia",
+        "westindia",
+        "canadacentral",
+        "canadaeast",
+        "uksouth",
+        "ukwest",
+        "westcentralus",
+        "westus2",
+        "koreacentral",
+        "koreasouth",
+        "francecentral",
+        "francesouth",
+        "uaecentral",
+        "southafricanorth",
+        "southafricawest"
+      ],
+      "defaultValue": "southcentralus"
+    },
+    "LogicAppName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "DeviceEnrollment"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "For_each": {
+              "type": "Foreach",
+              "foreach": "@body('Parse_JSON_DeviceEnrollHook_Results')",
+              "actions": {
+                "Condition_-_Does_the_record_already_exist": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "greaterOrEquals": [
+                          "@length(body('List_Records_with_matching_SerialNumber')?['result'])",
+                          1
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "For_Each_Existing_Record": {
+                      "type": "Foreach",
+                      "foreach": "@body('List_Records_with_matching_SerialNumber')?['result']",
+                      "actions": {
+                        "Send_an_email_(V2)": {
+                          "type": "ApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connection": {
+                                "name": "@parameters('$connections')['office365']['connectionId']"
+                              }
+                            },
+                            "method": "post",
+                            "body": {
+                              "To": "someone@someone.com",
+                              "Subject": "Test email for device enrollment",
+                              "Body": "<p>deviceName=@{body('Parse_GetManagedDevice_Results')?['deviceName']}<br>\nmanagedDeviceOwnerType=@{body('Parse_GetManagedDevice_Results')?['managedDeviceOwnerType']}<br>\nenrolledDateTime=@{body('Parse_GetManagedDevice_Results')?['enrolledDateTime']}<br>\noperatingSystem=@{body('Parse_GetManagedDevice_Results')?['operatingSystem']}<br>\ncomplianceState=@{body('Parse_GetManagedDevice_Results')?['complianceState']}<br>\nmanagementAgent=@{body('Parse_GetManagedDevice_Results')?['managementAgent']}<br>\nosVersion=@{body('Parse_GetManagedDevice_Results')?['osVersion']}<br>\nemailAddress=@{body('Parse_GetManagedDevice_Results')?['emailAddress']}<br>\nazureADDeviceID=@{body('Parse_GetManagedDevice_Results')?['azureADDeviceId']}<br>\nmodel=@{body('Parse_GetManagedDevice_Results')?['model']}<br>\nmanufacturer=@{body('Parse_GetManagedDevice_Results')?['manufacturer']}<br>\nserialNumber=@{body('Parse_GetManagedDevice_Results')?['serialNumber']}<br>\nuserDisplayName=@{body('Parse_GetManagedDevice_Results')?['userDisplayName']}<br>\nuserPrincipalName=@{body('Parse_GetManagedDevice_Results')?['userPrincipalName']}<br>\n</p>"
+                            },
+                            "path": "/v2/Mail"
+                          },
+                          "runAfter": {
+                            "Update_Existing_Record_In_CMDB": [
+                              "Succeeded"
+                            ]
+                          }
+                        },
+                        "Update_Existing_Record_In_CMDB": {
+                          "type": "ApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connection": {
+                                "name": "@parameters('$connections')['service-now']['connectionId']"
+                              }
+                            },
+                            "method": "put",
+                            "body": {
+                              "discovery_source": "Intune",
+                              "object_id": "@body('Parse_GetManagedDevice_Results')?['azureADDeviceId']",
+                              "last_discovered": "@body('Parse_GetManagedDevice_Results')?['lastSyncDateTime']",
+                              "vendor": "@body('Parse_GetManagedDevice_Results')?['manufacturer']",
+                              "os_version": "@body('Parse_Properties')?['Version']",
+                              "name": "@body('Parse_GetManagedDevice_Results')?['deviceName']",
+                              "os": "@body('Parse_GetManagedDevice_Results')?['operatingSystem']"
+                            },
+                            "path": "/api/now/v2/table/@{encodeURIComponent('cmdb_ci_computer')}/@{encodeURIComponent(items('For_Each_Existing_Record')?['ci'])}",
+                            "queries": {
+                              "sysparm_display_value": false,
+                              "sysparm_exclude_reference_link": true
+                            }
+                          },
+                          "runAfter": {}
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "List_Records_with_matching_SerialNumber": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Condition": {
+                        "type": "If",
+                        "expression": {
+                          "and": [
+                            {
+                              "greaterOrEquals": [
+                                "@length(body('List_Records_-_see_if_Model_exists')?['result'])",
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        "actions": {
+                          "Model Exists - foreach result": {
+                            "type": "Foreach",
+                            "foreach": "@body('List_Records_-_see_if_Model_exists')?['result']",
+                            "actions": {
+                              "Create_Asset_Record_And_Tie_to_Existing_Model": {
+                                "type": "ApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "connection": {
+                                      "name": "@parameters('$connections')['service-now']['connectionId']"
+                                    }
+                                  },
+                                  "method": "post",
+                                  "body": {
+                                    "model_category": "Computer",
+                                    "model": "@items('Model Exists - foreach result')?['sys_id']",
+                                    "asset_tag": "@body('Parse_GetManagedDevice_Results')?['serialNumber']",
+                                    "serial_number": "@body('Parse_GetManagedDevice_Results')?['serialNumber']"
+                                  },
+                                  "path": "/api/now/v2/table/@{encodeURIComponent('alm_hardware')}",
+                                  "queries": {
+                                    "sysparm_display_value": false,
+                                    "sysparm_exclude_reference_link": true
+                                  }
+                                },
+                                "runAfter": {}
+                              },
+                              "Update_CMDB_Record_For_Existing_Asset": {
+                                "type": "ApiConnection",
+                                "inputs": {
+                                  "host": {
+                                    "connection": {
+                                      "name": "@parameters('$connections')['service-now']['connectionId']"
+                                    }
+                                  },
+                                  "method": "put",
+                                  "body": {
+                                    "discovery_source": "Intune",
+                                    "object_id": "@body('Parse_GetManagedDevice_Results')?['azureADDeviceId']",
+                                    "last_discovered": "@body('Parse_GetManagedDevice_Results')?['lastSyncDateTime']",
+                                    "vendor": "@body('Parse_GetManagedDevice_Results')?['manufacturer']",
+                                    "os_version": "@body('Parse_GetManagedDevice_Results')?['osVersion']",
+                                    "name": "@body('Parse_GetManagedDevice_Results')?['deviceName']",
+                                    "os": "@body('Parse_GetManagedDevice_Results')?['operatingSystem']"
+                                  },
+                                  "path": "/api/now/v2/table/@{encodeURIComponent('cmdb_ci_computer')}/@{encodeURIComponent(body('Create_Asset_Record_And_Tie_to_Existing_Model')?['result']?['ci'])}",
+                                  "queries": {
+                                    "sysparm_display_value": false,
+                                    "sysparm_exclude_reference_link": true
+                                  }
+                                },
+                                "runAfter": {
+                                  "Create_Asset_Record_And_Tie_to_Existing_Model": [
+                                    "Succeeded"
+                                  ]
+                                }
+                              }
+                            },
+                            "runAfter": {}
+                          }
+                        },
+                        "runAfter": {
+                          "List_Records_-_see_if_Model_exists": [
+                            "Succeeded"
+                          ]
+                        },
+                        "else": {
+                          "actions": {
+                            "Create_Asset_Record": {
+                              "type": "ApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connection": {
+                                    "name": "@parameters('$connections')['service-now']['connectionId']"
+                                  }
+                                },
+                                "method": "post",
+                                "body": {
+                                  "model_category": "Computer",
+                                  "model": "@body('Create_Model_Record')?['result']?['sys_id']",
+                                  "asset_tag": "@body('Parse_GetManagedDevice_Results')?['serialNumber']",
+                                  "serial_number": "@body('Parse_GetManagedDevice_Results')?['serialNumber']"
+                                },
+                                "path": "/api/now/v2/table/@{encodeURIComponent('alm_hardware')}",
+                                "queries": {
+                                  "sysparm_display_value": false,
+                                  "sysparm_exclude_reference_link": true
+                                }
+                              },
+                              "runAfter": {
+                                "Create_Model_Record": [
+                                  "Succeeded"
+                                ]
+                              }
+                            },
+                            "Create_Model_Record": {
+                              "type": "ApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connection": {
+                                    "name": "@parameters('$connections')['service-now']['connectionId']"
+                                  }
+                                },
+                                "method": "post",
+                                "body": {
+                                  "manufacturer": "@body('Parse_GetManagedDevice_Results')?['manufacturer']",
+                                  "model_number": "@body('Parse_GetManagedDevice_Results')?['model']",
+                                  "name": "@body('Parse_GetManagedDevice_Results')?['model']",
+                                  "model": "@body('Parse_GetManagedDevice_Results')?['model']"
+                                },
+                                "path": "/api/now/v2/table/@{encodeURIComponent('cmdb_hardware_product_model')}",
+                                "queries": {
+                                  "sysparm_display_value": false,
+                                  "sysparm_exclude_reference_link": true
+                                }
+                              },
+                              "runAfter": {}
+                            },
+                            "Update_CMDB_Record_For_Newly_Created_Asset": {
+                              "type": "ApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connection": {
+                                    "name": "@parameters('$connections')['service-now']['connectionId']"
+                                  }
+                                },
+                                "method": "put",
+                                "body": {
+                                  "discovery_source": "Intune",
+                                  "object_id": "@body('Parse_GetManagedDevice_Results')?['azureADDeviceId']",
+                                  "last_discovered": "@body('Parse_GetManagedDevice_Results')?['lastSyncDateTime']",
+                                  "vendor": "@body('Parse_GetManagedDevice_Results')?['manufacturer']",
+                                  "os_version": "@body('Parse_GetManagedDevice_Results')?['osVersion']",
+                                  "name": "@body('Parse_GetManagedDevice_Results')?['deviceName']",
+                                  "os": "@body('Parse_GetManagedDevice_Results')?['operatingSystem']"
+                                },
+                                "path": "/api/now/v2/table/@{encodeURIComponent('cmdb_ci_computer')}/@{encodeURIComponent(body('Create_Asset_Record')?['result']?['ci'])}",
+                                "queries": {
+                                  "sysparm_display_value": false,
+                                  "sysparm_exclude_reference_link": true
+                                }
+                              },
+                              "runAfter": {
+                                "Create_Asset_Record": [
+                                  "Succeeded"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "List_Records_-_see_if_Model_exists": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                          "host": {
+                            "connection": {
+                              "name": "@parameters('$connections')['service-now']['connectionId']"
+                            }
+                          },
+                          "method": "get",
+                          "path": "/api/now/v2/table/@{encodeURIComponent('cmdb_hardware_product_model')}",
+                          "queries": {
+                            "sysparm_display_value": true,
+                            "sysparm_exclude_reference_link": true,
+                            "sysparm_query": "name=@{body('Parse_GetManagedDevice_Results')?['model']}"
+                          }
+                        },
+                        "runAfter": {}
+                      }
+                    }
+                  }
+                },
+                "Graph_Query_to_GetMangedDevice": {
+                  "type": "Http",
+                  "inputs": {
+                    "method": "GET",
+                    "uri": "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/@{body('Parse_Properties')?['DeviceId']}",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "authentication": {
+                      "audience": "https://graph.microsoft.com",
+                      "clientId": "##GRAPHAUTH_CLIENT_ID##",
+                      "secret": "##GRAPHAUTH_SECRET##",
+                      "tenant": "##GRAPHTENANT_ID##",
+                      "type": "ActiveDirectoryOAuth"
+                    }
+                  },
+                  "runAfter": {
+                    "Parse_Properties": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "List_Records_with_matching_SerialNumber": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['service-now']['connectionId']"
+                      }
+                    },
+                    "method": "get",
+                    "path": "/api/now/v2/table/@{encodeURIComponent('alm_hardware')}",
+                    "queries": {
+                      "sysparm_display_value": false,
+                      "sysparm_exclude_reference_link": true,
+                      "sysparm_query": "serial_number=@{body('Parse_GetManagedDevice_Results')?['serialNumber']}"
+                    }
+                  },
+                  "runAfter": {
+                    "Parse_GetManagedDevice_Results": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Parse_GetManagedDevice_Results": {
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Graph_Query_to_GetMangedDevice')",
+                    "schema": {
+                      "properties": {
+                        "@@odata.context": {
+                          "type": "string"
+                        },
+                        "activationLockBypassCode": {},
+                        "androidSecurityPatchLevel": {},
+                        "azureADDeviceId": {
+                          "type": "string"
+                        },
+                        "azureADRegistered": {
+                          "type": "boolean"
+                        },
+                        "complianceGracePeriodExpirationDateTime": {
+                          "type": "string"
+                        },
+                        "complianceState": {
+                          "type": "string"
+                        },
+                        "configurationManagerClientEnabledFeatures": {},
+                        "deviceActionResults": {
+                          "type": "array"
+                        },
+                        "deviceCategoryDisplayName": {
+                          "type": "string"
+                        },
+                        "deviceEnrollmentType": {
+                          "type": "string"
+                        },
+                        "deviceHealthAttestationState": {},
+                        "deviceName": {
+                          "type": "string"
+                        },
+                        "deviceRegistrationState": {
+                          "type": "string"
+                        },
+                        "easActivated": {
+                          "type": "boolean"
+                        },
+                        "easActivationDateTime": {
+                          "type": "string"
+                        },
+                        "easDeviceId": {
+                          "type": "string"
+                        },
+                        "emailAddress": {
+                          "type": "string"
+                        },
+                        "enrolledDateTime": {
+                          "type": "string"
+                        },
+                        "exchangeAccessState": {
+                          "type": "string"
+                        },
+                        "exchangeAccessStateReason": {
+                          "type": "string"
+                        },
+                        "exchangeLastSuccessfulSyncDateTime": {
+                          "type": "string"
+                        },
+                        "freeStorageSpaceInBytes": {
+                          "type": "integer"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "imei": {},
+                        "isEncrypted": {
+                          "type": "boolean"
+                        },
+                        "isSupervised": {
+                          "type": "boolean"
+                        },
+                        "jailBroken": {
+                          "type": "string"
+                        },
+                        "lastSyncDateTime": {
+                          "type": "string"
+                        },
+                        "managedDeviceName": {
+                          "type": "string"
+                        },
+                        "managedDeviceOwnerType": {
+                          "type": "string"
+                        },
+                        "managementAgent": {
+                          "type": "string"
+                        },
+                        "manufacturer": {
+                          "type": "string"
+                        },
+                        "meid": {},
+                        "model": {
+                          "type": "string"
+                        },
+                        "operatingSystem": {
+                          "type": "string"
+                        },
+                        "osVersion": {
+                          "type": "string"
+                        },
+                        "partnerReportedThreatState": {
+                          "type": "string"
+                        },
+                        "phoneNumber": {},
+                        "remoteAssistanceSessionErrorDetails": {
+                          "type": "string"
+                        },
+                        "remoteAssistanceSessionUrl": {
+                          "type": "string"
+                        },
+                        "serialNumber": {
+                          "type": "string"
+                        },
+                        "subscriberCarrier": {
+                          "type": "string"
+                        },
+                        "totalStorageSpaceInBytes": {
+                          "type": "integer"
+                        },
+                        "userDisplayName": {
+                          "type": "string"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "userPrincipalName": {
+                          "type": "string"
+                        },
+                        "wiFiMacAddress": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Graph_Query_to_GetMangedDevice": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Parse_Properties": {
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@items('For_each')['Properties']",
+                    "schema": {
+                      "properties": {
+                        "AadDeviceId": {
+                          "type": "string"
+                        },
+                        "AadTenantId": {
+                          "type": "string"
+                        },
+                        "AccountId": {
+                          "type": "string"
+                        },
+                        "ActivityId": {
+                          "type": "string"
+                        },
+                        "DeviceId": {
+                          "type": "string"
+                        },
+                        "EnrollmentEndTime": {
+                          "type": "string"
+                        },
+                        "EnrollmentStartTime": {
+                          "type": "string"
+                        },
+                        "EnrollmentType": {
+                          "type": "string"
+                        },
+                        "EnrollmentTypeMessage": {
+                          "type": "string"
+                        },
+                        "EventId": {
+                          "type": "string"
+                        },
+                        "IsAutopilot": {
+                          "type": "string"
+                        },
+                        "IsDuringEsp": {
+                          "type": "integer"
+                        },
+                        "RelatedActivityId": {
+                          "type": "string"
+                        },
+                        "Result": {
+                          "type": "string"
+                        },
+                        "ScaleUnit": {
+                          "type": "string"
+                        },
+                        "ScenarioName": {
+                          "type": "string"
+                        },
+                        "Scope": {
+                          "type": "string"
+                        },
+                        "StartTime": {
+                          "type": "string"
+                        },
+                        "Status": {
+                          "type": "string"
+                        },
+                        "TimeDiff": {
+                          "type": "string"
+                        },
+                        "Timestamp": {
+                          "type": "string"
+                        },
+                        "UserId": {
+                          "type": "string"
+                        },
+                        "UserUPN": {
+                          "type": "string"
+                        },
+                        "Version": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "Parse_JSON_DeviceEnrollHook_Results": [
+                  "Succeeded"
+                ]
+              },
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              }
+            },
+            "ParseDeviceEnrollHook": {
+              "type": "Function",
+              "inputs": {
+                "body": "@triggerBody()",
+                "headers": {
+                  "ContentType": "Applicatoin/Json"
+                },
+                "function": {
+                  "id": "/subscriptions/##AZUREFUNCTION_SUBSCRIPTIONID##/resourceGroups/IntuneTest/providers/Microsoft.Web/sites/ParseDeviceEnrollHook/functions/##AZUREFUNCTION_FUNCTIONNAME##"
+                }
+              },
+              "runAfter": {}
+            },
+            "Parse_JSON_DeviceEnrollHook_Results": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('ParseDeviceEnrollHook')",
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "Category": {
+                        "type": "string"
+                      },
+                      "OperationName": {
+                        "type": "string"
+                      },
+                      "Properties": {
+                        "type": "string"
+                      },
+                      "Result": {
+                        "type": "string"
+                      },
+                      "SourceSystem": {
+                        "type": "string"
+                      },
+                      "TenantId": {
+                        "type": "string"
+                      },
+                      "TimeGenerated": {
+                        "type": "string"
+                      },
+                      "Type": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "TimeGenerated",
+                      "OperationName",
+                      "Type",
+                      "TenantId",
+                      "Properties",
+                      "SourceSystem",
+                      "Result",
+                      "Category"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "runAfter": {
+                "ParseDeviceEnrollHook": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "body": {
+                      "properties": {
+                        "data": {
+                          "properties": {
+                            "IncludeSearchResults": {
+                              "type": "boolean"
+                            },
+                            "SearchResults": {
+                              "properties": {
+                                "dataSources": {
+                                  "items": {
+                                    "properties": {
+                                      "region": {
+                                        "type": "string"
+                                      },
+                                      "resourceId": {
+                                        "type": "string"
+                                      },
+                                      "tables": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "resourceId",
+                                      "region",
+                                      "tables"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "tables": {
+                                  "items": {
+                                    "properties": {
+                                      "columns": {
+                                        "items": {
+                                          "properties": {
+                                            "name": {
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "type"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "rows": {
+                                        "items": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "columns",
+                                      "rows"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "alertname": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string"
+                            },
+                            "subscriptionid": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "schemaId": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "headers": {
+                      "properties": {
+                        "Connection": {
+                          "type": "string"
+                        },
+                        "Content-Length": {
+                          "type": "string"
+                        },
+                        "Content-Type": {
+                          "type": "string"
+                        },
+                        "Expect": {
+                          "type": "string"
+                        },
+                        "Host": {
+                          "type": "string"
+                        },
+                        "User-Agent": {
+                          "type": "string"
+                        },
+                        "X-CorrelationContext": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "office365": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'southcentralus', '/managedApis/', 'office365')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('office365_1_Connection_Name'))]",
+                "connectionName": "[parameters('office365_1_Connection_Name')]"
+              },
+              "service-now": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'southcentralus', '/managedApis/', 'service-now')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('service-now_1_Connection_Name'))]",
+                "connectionName": "[parameters('service-now_1_Connection_Name')]"
+              }
+            }
+          }
+        }
+      },
+      "name": "[parameters('LogicAppName')]",
+      "type": "Microsoft.Logic/workflows",
+      "location": "[parameters('LogicAppLocation')]",
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "apiVersion": "2016-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('office365_1_Connection_Name'))]",
+        "[resourceId('Microsoft.Web/connections', parameters('service-now_1_Connection_Name'))]"
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('office365_1_Connection_Name')]",
+      "location": "southcentralus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'southcentralus', '/managedApis/', 'office365')]"
+        },
+        "displayName": "[parameters('office365_1_Connection_DisplayName')]"
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('service-now_1_Connection_Name')]",
+      "location": "southcentralus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'southcentralus', '/managedApis/', 'service-now')]"
+        },
+        "displayName": "[parameters('service-now_1_Connection_DisplayName')]",
+        "parameterValues": {
+          "instance": "[parameters('service-now_1_instance')]",
+          "username": "[parameters('service-now_1_username')]",
+          "password": "[parameters('service-now_1_password')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
